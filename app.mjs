@@ -173,39 +173,6 @@ function render() {
         );
     }
 
-    const seasonStats = [
-        [
-            "REGULAR-SEASON GAMES",
-            state.scored.totals.regular * 2,
-            "/ 1,230"
-        ],
-        [
-            "PLAYOFF TEAMS",
-            state.scored.qualified.length,
-            "/ 16"
-        ],
-        [
-            "SERIES COMPLETED",
-            state.scored.series.filter(s => s.winner).length,
-            "/ 15"
-        ],
-        [
-            "CONFERENCE CHAMPIONS",
-            state.scored.totals.conference / 10,
-            "/ 2"
-        ]
-    ];
-
-    $("#season-stats").innerHTML = seasonStats.map(
-        ([label, value, denominator]) => `
-      <div>
-        <small>${label}</small>
-        <strong>${fmt(value)}</strong>
-        <span>${denominator}</span>
-      </div>
-    `
-    ).join("");
-
     renderGames();
     renderRosters(owners, picks);
     renderPlayoffs();
