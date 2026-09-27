@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#08111f">
+    <meta name="description"
+        content="Michael vs. Zach: an automatically updated, season-long NBA team draft. Every win counts.">
+    <title>Michael vs. Zach | NBA Fantasy Draft</title>
+    <link rel="icon" href="assets/ball.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <a class="skip" href="#content">Skip to content</a>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="#home">
+                <img src="assets/ball.svg" alt="" width="36" height="36">
+                <span>
+                    <strong>Fantasy Draft</strong>
+                    <small>MICHAEL VS. ZACH · NBA</small>
+                </span>
+            </a>
+
+            <nav aria-label="Main navigation">
+                <a href="#home" data-page="home" aria-current="page">Scoreboard</a>
+                <a href="#teams" data-page="teams">Teams</a>
+                <a href="#playoffs" data-page="playoffs">Playoffs</a>
+                <a href="#rules" data-page="rules">Scoring</a>
+            </nav>
+
+            <button class="button small secondary" id="open-draft">
+                Manage draft <span aria-hidden="true">↗</span>
+            </button>
+        </div>
+    </header>
+
+    <main id="content" tabindex="-1">
+        <div class="season-bar">
+            <span class="league-kicker">
+                <span class="pulse"></span>
+                THE SEASON-LONG RIVALRY
+            </span>
+
+            <label class="season-picker">
+                Season
+                <select id="season" aria-label="Select season">
+                    <option>Loading…</option>
+                </select>
+            </label>
+        </div>
+
+        <div id="notice" class="notice" role="status" aria-live="polite">
+            Loading NBA season data…
+        </div>
+
+        <div id="local-notice" class="notice local" hidden></div>
+
+        <section id="home" class="page">
+            <div class="heading">
+                <div>
+                    <p class="eyebrow">30 TEAMS. TWO SIDES. EVERY WIN COUNTS.</p>
+                    <h1>The hardwood rivalry<span>.</span></h1>
+                    <p class="subtitle" id="season-caption">
+                        Your teams. One season. Bragging rights.
+                    </p>
+                </div>
+
+                <div class="update-controls">
+                    <span id="freshness">Connecting…</span>
+                    <button class="icon-button" id="refresh" aria-label="Refresh scores">↻</button>
+                </div>
+            </div>
+
+            <div id="scoreboard" class="scoreboard" aria-live="polite">
+                <div class="empty">Loading the scoreboard…</div>
+            </div>
+
+            <div class="race">
+                <div id="race-bar" class="race-bar">
+                    <span style="width:50%"></span>
+                </div>
+
+                <div class="race-caption">
+                    <span id="lead">Waiting for the draft</span>
+                    <span id="awarded">852 league points available</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <div>
+                    <p class="eyebrow">ACROSS THE LEAGUE</p>
+                    <h2>On the court</h2>
+                </div>
+
+                <div class="segmented" aria-label="Game filter">
+                    <button data-filter="all" aria-pressed="true">All games</button>
+                    <button data-filter="rivalry" aria-pressed="false">
+                        Head-to-head
+                    </button>
+                </div>
+            </div>
+
+            <p class="section-help" id="games-help">
+                Recent results and upcoming games. Only final results earn points.
+            </p>
+
+            <div id="games" class="games-grid"></div>
+            <div class="season-stats" id="season-stats"></div>
+        </section>
+
+        <section id="teams" class="page" hidden>
+            <div class="heading">
+                <div>
+                    <p class="eyebrow">THE DRAFT BOARD</p>
+                    <h1>Pick a side<span>.</span></h1>
+                    <p class="subtitle">
+                        Every team’s contribution, from opening night to the Finals.
+                    </p>
+                </div>
+
+                <button class="button secondary" id="teams-draft">
+                    Manage draft
+                </button>
+            </div>
+
+            <div id="rosters" class="rosters"></div>
+
+            <details class="panel all-teams">
+                <summary>All 30 NBA teams &amp; scoring breakdown</summary>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>W–L</th>
+                                <th>Regular</th>
+                                <th>Playoffs</th>
+                                <th>Series</th>
+                                <th>Conf.</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-team-rows"></tbody>
+                    </table>
+                </div>
+            </details>
+        </section>
+
+        <section id="playoffs" class="page" hidden>
+            <div class="heading">
+                <div>
+                    <p class="eyebrow">THE ROAD TO THE FINALS</p>
+                    <h1>Seven points. Every series<span>.</span></h1>
+                    <p class="subtitle">
+                        Game wins earn one point. The series winner claims the unplayed games.
+                    </p>
+                </div>
+
+                <span class="pill">237 postseason points</span>
+            </div>
+
+            <div id="playoff-content"></div>
+        </section>
+
+        <section id="rules" class="page" hidden>
+            <div class="heading">
+                <div>
+                    <p class="eyebrow">THE RULEBOOK</p>
+                    <h1>Make every win count<span>.</span></h1>
+                    <p class="subtitle">
+                        852 points across a full NBA season. One rivalry to settle.
+                    </p>
+                </div>
+            </div>
+
+            <div class="rule-grid">
+                <article class="panel rule">
+                    <span class="rule-number">0.5</span>
+                    <h2>Regular-season win</h2>
+                    <p>
+                        Each win adds half a point. 1,230 games put 615 points on the board.
+                    </p>
+                </article>
+
+                <article class="panel rule">
+                    <span class="rule-number">7</span>
+                    <h2>Make the playoffs</h2>
+                    <p>
+                        Seven points for each of the 16 playoff teams.
+                        A play-in berth alone doesn’t qualify.
+                    </p>
+                </article>
+
+                <article class="panel rule">
+                    <span class="rule-number">7</span>
+                    <h2>Per playoff series</h2>
+                    <p>
+                        One point for every game won. Win the series and collect the
+                        remaining points in its seven-point pool.
+                    </p>
+                </article>
+
+                <article class="panel rule">
+                    <span class="rule-number">10</span>
+                    <h2>Conference champion</h2>
+                    <p>
+                        Ten extra points for each conference winner, on top of its series points.
+                    </p>
+                </article>
+            </div>
+
+            <div class="rules-bottom">
+                <article class="panel calculator">
+                    <p class="eyebrow">TRY THE SCORING</p>
+                    <h2>What does a series win earn?</h2>
+
+                    <label for="series-result">Final series result</label>
+                    <select id="series-result">
+                        <option value="0">4–0 sweep</option>
+                        <option value="1">4–1</option>
+                        <option value="2" selected>4–2</option>
+                        <option value="3">4–3</option>
+                    </select>
+
+                    <div id="calculator-result" aria-live="polite"></div>
+
+                    <label class="checkbox">
+                        <input type="checkbox" id="conference-check">
+                        This is a conference final
+                    </label>
+                </article>
+
+                <article class="panel">
+                    <p class="eyebrow">THE DETAILS</p>
+                    <h2>A few ground rules</h2>
+
+                    <ul class="rule-list">
+                        <li>Both teams keep their points from games they win.</li>
+                        <li>
+                            The NBA Finals uses the same seven-point series pool.
+                            There is no additional NBA title bonus.
+                        </li>
+                        <li>
+                            Play-in games, preseason games, All-Star games and the NBA Cup
+                            final earn no points.
+                        </li>
+                        <li>
+                            Other NBA Cup games that count toward regular-season records
+                            earn the usual 0.5 points per win.
+                        </li>
+                        <li>
+                            Points are awarded only for completed games. A playoff-entry
+                            bonus appears when the feed confirms a berth or lists the team
+                            in a playoff series.
+                        </li>
+                    </ul>
+
+                    <div class="split-stat">
+                        <span>Regular season <strong>72.18%</strong></span>
+                        <span>Postseason <strong>27.82%</strong></span>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <span>
+            Built for the annual <strong>Michael vs. Zach</strong> NBA draft.
+        </span>
+        <span>
+            Scores via
+            <a href="https://www.espn.com/nba/scoreboard" target="_blank" rel="noreferrer">ESPN</a>
+            · Unofficial fantasy tracker
+        </span>
+    </footer>
+
+    <dialog id="draft-dialog" aria-labelledby="draft-title">
+        <div class="dialog-head">
+            <div>
+                <p class="eyebrow" id="draft-season">SEASON DRAFT</p>
+                <h2 id="draft-title">Build your rosters</h2>
+            </div>
+
+            <button class="icon-button" id="close-draft" aria-label="Close draft">×</button>
+        </div>
+
+        <p class="muted">
+            Choose an owner, then pick a team. Draft order is saved as you go.
+        </p>
+
+        <div id="owner-buttons" class="owner-buttons"></div>
+
+        <div class="draft-toolbar">
+            <input type="search" id="team-search" placeholder="Find a team…" aria-label="Search available NBA teams">
+            <button class="button small secondary" id="undo-pick">
+                Undo last pick
+            </button>
+        </div>
+
+        <div id="draft-progress" class="draft-progress" aria-live="polite"></div>
+
+        <div id="draft-teams" class="draft-teams"></div>
+
+        <div class="draft-save">
+            <strong>Saved on this device</strong>
+
+            <p>
+                To give everyone the same rosters, download <code>league.json</code>
+                and replace that file in your GitHub repository once after the draft.
+                Scores update automatically.
+            </p>
+
+            <div class="draft-actions">
+                <button class="button" id="export-draft">
+                    Download league.json
+                </button>
+
+                <label class="button secondary file-label">
+                    Import draft
+                    <input id="import-draft" type="file" accept=".json,application/json">
+                </label>
+
+                <button class="text-button" id="published-draft">
+                    Use published draft
+                </button>
+            </div>
+
+            <p id="draft-message" role="status"></p>
+        </div>
+    </dialog>
+
+    <noscript>
+        <div class="notice">
+            Enable JavaScript to load the NBA standings and scoring.
+        </div>
+    </noscript>
+
+    <script type="module" src="app.mjs"></script>
+</body>
+
+</html>

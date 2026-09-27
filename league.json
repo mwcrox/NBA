@@ -1,0 +1,16 @@
+{
+    "title": "Michael vs. Zach",
+    "owners": [
+        {
+            "id": "michael",
+            "name": "Michael",
+            "color": "#ff873c"
+        },
+        {
+            "id": "zach",
+            "name": "Zach",
+            "color": "#b9a1ff"
+        }
+    ],
+    "drafts": {}
+}

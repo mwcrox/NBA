@@ -1,0 +1,89 @@
+name: Update NBA scores and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: nba-pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Generate historical JSON on first run
+        run: |
+          if [ ! -f data/seasons/2025.json ]; then
+            node scripts/update-data.mjs 2025
+          fi
+
+          if [ ! -f data/seasons/2026.json ]; then
+            node scripts/update-data.mjs 2026
+          fi
+
+      - name: Check scoring rules
+        run: npm test
+
+      - name: Refresh season data
+        id: scores
+        continue-on-error: true
+        run: npm run update
+
+      - name: Keep last valid data if the feed fails
+        if: steps.scores.outcome == 'failure'
+        run: |
+          git restore data
+          echo '::warning::NBA refresh failed. Publishing the last saved scores.'
+
+      - name: Confirm generated data exists
+        run: |
+          test -f data/index.json
+
+      - name: Save snapshots and history
+        run: |
+          git config user.name 'NBA score updater'
+          git config user.email 'nba-updater@users.noreply.github.com'
+
+          git add data
+
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update NBA scores'
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - name: Stage public website
+        run: |
+          mkdir -p public
+          cp index.html style.css app.mjs league.json public/
+          cp -r assets data public/
+          touch public/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - uses: actions/deploy-pages@v4
+        id: deployment
