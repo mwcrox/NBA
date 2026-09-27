@@ -187,14 +187,6 @@ nav a[aria-current]:after {
     line-height: 1;
 }
 
-.text-button {
-    border: 0;
-    background: none;
-    text-decoration: underline;
-    color: var(--muted);
-    font-size: 12px;
-}
-
 main {
     max-width: 1240px;
     margin: auto;
@@ -227,14 +219,6 @@ main {
     box-shadow: 0 0 12px #ff873c80;
 }
 
-.season-picker {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    color: var(--muted);
-    font-size: 12px;
-}
-
 select,
 input[type=search] {
     border: 1px solid var(--line);
@@ -256,12 +240,6 @@ select {
     border-radius: 8px;
     font-size: 13px;
     margin: 0 0 22px;
-}
-
-.notice.local {
-    border-color: #524771;
-    background: #32284255;
-    color: #d5c8ff;
 }
 
 .notice.error {
@@ -429,28 +407,6 @@ h3 {
     color: var(--muted);
     margin-left: 12px;
     font-weight: 400;
-}
-
-.score-breakdown {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border-top: 1px solid #ffffff12;
-    margin: 0 -28px;
-    padding: 18px 28px;
-    background: #060c141f;
-    gap: 12px;
-}
-
-.score-breakdown small {
-    display: block;
-    font-size: 9px;
-    color: var(--muted);
-    margin-bottom: 4px;
-}
-
-.score-breakdown strong {
-    font-size: 18px;
-    font-variant-numeric: tabular-nums;
 }
 
 .race {
@@ -739,15 +695,6 @@ td:first-child {
     text-align: left;
 }
 
-.pill {
-    border: 1px solid #655933;
-    border-radius: 25px;
-    color: #e1c684;
-    padding: 8px 14px;
-    font-size: 11px;
-    white-space: nowrap;
-}
-
 .round-heading {
     display: flex;
     align-items: center;
@@ -902,22 +849,6 @@ td:first-child {
     margin: 8px 0;
 }
 
-.split-stat {
-    display: flex;
-    gap: 30px;
-    border-top: 1px solid var(--line);
-    padding-top: 16px;
-    margin-top: 20px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.split-stat strong {
-    display: block;
-    font-size: 22px;
-    color: var(--text);
-}
-
 footer {
     max-width: 1168px;
     margin: 0 auto;
@@ -939,141 +870,9 @@ footer a {
     text-decoration: underline;
 }
 
-dialog {
-    max-width: 800px;
-    width: calc(100% - 32px);
-    max-height: 90vh;
-    border: 1px solid #52647e;
-    border-radius: 15px;
-    padding: 28px;
-    background: #101b2a;
-    color: var(--text);
-    box-shadow: 0 30px 120px #0009;
-}
-
-dialog::backdrop {
-    background: #020710ca;
-    backdrop-filter: blur(5px);
-}
-
-.dialog-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .muted {
     color: var(--muted);
     font-size: 13px;
-}
-
-.owner-buttons {
-    display: flex;
-    gap: 10px;
-    margin: 22px 0;
-}
-
-.owner-buttons button {
-    flex: 1;
-    background: #152337;
-    color: var(--text);
-    padding: 12px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-}
-
-.owner-buttons button[aria-pressed=true] {
-    border-color: var(--orange);
-    background: #ff873c18;
-}
-
-.owner-buttons button:last-child[aria-pressed=true] {
-    border-color: var(--purple);
-    background: #b9a1ff18;
-}
-
-.draft-toolbar {
-    display: flex;
-    gap: 10px;
-}
-
-.draft-toolbar input {
-    flex: 1;
-    min-width: 80px;
-}
-
-.draft-progress {
-    color: var(--muted);
-    font-size: 11px;
-    margin: 15px 0;
-}
-
-.draft-teams {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    max-height: 310px;
-    overflow: auto;
-    padding: 3px;
-}
-
-.draft-team {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    background: #18263a;
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    padding: 9px;
-    font-size: 11px;
-    text-align: left;
-}
-
-.draft-team span {
-    min-width: 0;
-}
-
-.draft-team small {
-    display: block;
-    color: var(--muted);
-    font-size: 9px;
-}
-
-.draft-team:disabled {
-    opacity: .52;
-}
-
-.draft-save {
-    border-top: 1px solid var(--line);
-    margin-top: 22px;
-    padding-top: 22px;
-}
-
-.draft-save>strong {
-    font-size: 13px;
-}
-
-.draft-save p {
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.draft-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 9px;
-}
-
-.file-label {
-    cursor: pointer;
-}
-
-.file-label input {
-    display: none;
-}
-
-#draft-message {
-    color: #e9cb8b;
 }
 
 code {
@@ -1123,12 +922,6 @@ code {
 
     .score-card {
         padding: 22px 22px 0;
-    }
-
-    .score-breakdown {
-        margin: 0 -22px;
-        padding: 16px 22px;
-        gap: 8px;
     }
 
     .series-grid {
@@ -1203,16 +996,6 @@ code {
         letter-spacing: 1px;
     }
 
-    .season-picker {
-        font-size: 10px;
-        gap: 7px;
-    }
-
-    .season-picker select {
-        font-size: 11px;
-        padding: 7px 8px;
-    }
-
     .heading {
         display: block;
         margin: 23px 0;
@@ -1277,21 +1060,6 @@ code {
     .score-value small {
         font-size: 9px;
         margin-left: 4px;
-    }
-
-    .score-breakdown {
-        grid-template-columns: 1fr 1fr;
-        margin: 0 -13px;
-        padding: 12px 13px;
-        gap: 12px;
-    }
-
-    .score-breakdown strong {
-        font-size: 16px;
-    }
-
-    .score-breakdown small {
-        font-size: 8px;
     }
 
     .race {
@@ -1384,11 +1152,6 @@ code {
         font-size: 9px;
     }
 
-    .pill {
-        display: inline-block;
-        margin-top: 20px;
-    }
-
     .rule-grid {
         gap: 10px;
     }
@@ -1427,31 +1190,6 @@ code {
         margin-bottom: 8px;
     }
 
-    dialog {
-        padding: 20px;
-    }
-
-    .draft-teams {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .draft-team {
-        padding: 8px;
-        font-size: 10px;
-    }
-
-    .draft-team .team-logo {
-        width: 25px;
-    }
-
-    .draft-actions .button {
-        font-size: 11px;
-    }
-
-    .draft-toolbar .button {
-        font-size: 10px;
-    }
-
     .notice {
         font-size: 12px;
     }
@@ -1461,5 +1199,17 @@ code {
     * {
         scroll-behavior: auto !important;
         transition: none !important;
+    }
+}
+
+.season-label {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+    .season-label {
+        font-size: 10px;
     }
 }

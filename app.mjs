@@ -4,10 +4,11 @@ import {
     mergeGames,
     scoreSeason,
     ownerScores,
-    validateDraft,
     seriesAllocation,
     ROUND_NAMES
 } from "./assets/scoring.mjs";
+
+import { parseLeague } from "./assets/league.mjs";
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -32,15 +33,11 @@ const state = {
     year: null,
     teams: [],
     league: null,
-    index: null,
     snapshot: null,
     scored: null,
     filter: "all",
-    owner: null,
     busy: false
 };
-
-const storageKey = year => `nba-fantasy-draft-v1-${year}`;
 
 async function fetchJSON(url) {
     const response = await fetch(url, {
@@ -55,39 +52,8 @@ async function fetchJSON(url) {
     return response.json();
 }
 
-function localDraft() {
-    try {
-        const value = JSON.parse(
-            localStorage.getItem(storageKey(state.year))
-        );
-
-        if (value) {
-            return validateDraft(value, state.teams, state.league.owners);
-        }
-    } catch { }
-
-    return null;
-}
-
 function draft() {
-    return localDraft()
-        ?? state.league.drafts[String(state.year)]
-        ?? [];
-}
-
-function saveDraft(picks) {
-    validateDraft(picks, state.teams, state.league.owners);
-
-    try {
-        localStorage.setItem(
-            storageKey(state.year),
-            JSON.stringify(picks)
-        );
-    } catch {
-        throw new Error(
-            "This browser cannot save the draft. Enable browser storage and try again."
-        );
-    }
+    return state.league.picks;
 }
 
 function ownerOf(id) {
@@ -129,20 +95,6 @@ function notice(text, error = false) {
     $("#notice").classList.toggle("error", error);
 }
 
-function localNotice() {
-    const local = localDraft();
-    const base = state.league.drafts[String(state.year)] || [];
-
-    const differing = local
-        && JSON.stringify(local) !== JSON.stringify(base);
-
-    $("#local-notice").hidden = !differing;
-
-    $("#local-notice").textContent =
-        "You’re viewing a draft saved on this device. Download league.json " +
-        "from Manage draft and upload it to GitHub to share these rosters.";
-}
-
 function score() {
     state.scored = scoreSeason(
         state.teams,
@@ -153,9 +105,9 @@ function score() {
 
 function render() {
     score();
-    localNotice();
 
     const picks = draft();
+
     const owners = ownerScores(
         state.scored,
         picks,
@@ -175,13 +127,6 @@ function render() {
             owner.total === max &&
             owners[0].total !== owners[1].total;
 
-        const breakdown = [
-            ["Regular season", owner.regular],
-            ["Playoff entry", owner.entry],
-            ["Series points", owner.series],
-            ["Conference", owner.conference]
-        ];
-
         return `
       <article class="score-card ${index ? "purple" : ""}">
         <div class="owner-line">
@@ -200,21 +145,18 @@ function render() {
         <div class="score-value">
           ${fmt(owner.total)}<small>PTS</small>
         </div>
-
-        <div class="score-breakdown">
-          ${breakdown.map(([label, value]) => `
-            <div>
-              <small>${label}</small>
-              <strong>${fmt(value)}</strong>
-            </div>
-          `).join("")}
-        </div>
       </article>
     `;
     }).join("");
 
-    const total = owners.reduce((sum, owner) => sum + owner.total, 0);
-    const diff = Math.abs(owners[0].total - owners[1].total);
+    const total = owners.reduce(
+        (sum, owner) => sum + owner.total,
+        0
+    );
+
+    const diff = Math.abs(
+        owners[0].total - owners[1].total
+    );
 
     $("#race-bar span").style.width =
         `${total ? owners[0].total / total * 100 : 50}%`;
@@ -225,13 +167,9 @@ function render() {
             : "All tied up"
         : "The rivalry starts with your draft";
 
-    $("#awarded").textContent =
-        `${fmt(state.scored.totals.total)} / 852 league points awarded`;
-
     if (!picks.length) {
         notice(
-            "No draft has been published for this season. " +
-            "Choose Manage draft to assign your teams."
+            "The 2026–2027 draft has not been set yet."
         );
     }
 
@@ -288,7 +226,9 @@ function renderGames() {
 
     const now = Date.now();
 
-    const live = games.filter(game => game.state === "in");
+    const live = games.filter(
+        game => game.state === "in"
+    );
 
     const upcoming = games.filter(game =>
         game.state === "pre" &&
@@ -303,13 +243,19 @@ function renderGames() {
     const shown = mergeGames(live);
 
     for (const game of upcoming) {
-        if (shown.length < 6 && !shown.some(s => s.id === game.id)) {
+        if (
+            shown.length < 6 &&
+            !shown.some(s => s.id === game.id)
+        ) {
             shown.push(game);
         }
     }
 
     for (const game of recent) {
-        if (shown.length < 6 && !shown.some(s => s.id === game.id)) {
+        if (
+            shown.length < 6 &&
+            !shown.some(s => s.id === game.id)
+        ) {
             shown.push(game);
         }
     }
@@ -326,7 +272,7 @@ function renderGames() {
         </h2>
         <p>
           ${rivalry
-                ? "Assign teams to both owners to find games between your rosters."
+                ? "Head-to-head matchups will appear after both rosters are set."
                 : "Games will appear automatically when the season schedule is available."}
         </p>
       </div>
@@ -336,10 +282,13 @@ function renderGames() {
     }
 
     $("#games").innerHTML = shown.map(game => {
-        const date = new Date(game.date).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric"
-        });
+        const date = new Date(game.date).toLocaleDateString(
+            "en-US",
+            {
+                month: "short",
+                day: "numeric"
+            }
+        );
 
         const status = game.state === "pre"
             ? new Date(game.date).toLocaleTimeString("en-US", {
@@ -349,7 +298,9 @@ function renderGames() {
             })
             : game.status;
 
-        const winner = game.winner ? team(game.winner) : null;
+        const winner = game.winner
+            ? team(game.winner)
+            : null;
 
         const roundLabel = game.phase === "playoff"
             ? ROUND_NAMES[game.round].toUpperCase()
@@ -366,7 +317,9 @@ function renderGames() {
                 game.phase === "playoff" &&
                 state.scored.series.some(series =>
                     series.winner === winner.id &&
-                    series.games.filter(g => g.completed).at(-1)?.id === game.id
+                    series.games
+                        .filter(g => g.completed)
+                        .at(-1)?.id === game.id
                 );
 
             foot =
@@ -424,10 +377,10 @@ function renderRosters(owners, picks) {
       </div>
 
       ${owner.roster.length
-            ? owner.roster.map(t => `
+            ? owner.roster.map((t, rosterIndex) => `
             <div class="roster-row">
               <span class="pick-number">
-                ${picks.findIndex(p => p.team === t.id) + 1}
+                ${rosterIndex + 1}
               </span>
 
               ${logo(t)}
@@ -435,29 +388,27 @@ function renderRosters(owners, picks) {
               <div>
                 ${escape(t.name)}
                 <span class="team-meta">
-                  ${t.wins}–${t.losses} ·
-                  ${fmt(t.regular)} regular +
-                  ${fmt(t.entry + t.series + t.conference)} postseason
+                  ${t.wins}–${t.losses}
                 </span>
               </div>
 
               <span class="points">${fmt(t.total)}</span>
             </div>
           `).join("")
-            : '<div class="empty">Your first pick is waiting.</div>'}
+            : '<div class="empty">Roster not set yet.</div>'}
     </article>
   `).join("");
 
     $("#all-team-rows").innerHTML = [...state.scored.teams]
-        .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
+        .sort(
+            (a, b) =>
+                b.total - a.total ||
+                a.name.localeCompare(b.name)
+        )
         .map(t => `
       <tr>
         <td>${escape(t.name)} ${dot(t.id)}</td>
         <td>${t.wins}–${t.losses}</td>
-        <td>${fmt(t.regular)}</td>
-        <td>${fmt(t.entry)}</td>
-        <td>${fmt(t.series)}</td>
-        <td>${fmt(t.conference)}</td>
         <td><strong>${fmt(t.total)}</strong></td>
       </tr>
     `).join("");
@@ -542,6 +493,7 @@ function renderPlayoffs() {
 function renderCalculator() {
     const loss = Number($("#series-result").value);
     const bonus = $("#conference-check").checked ? 10 : 0;
+
     const [winner, loser] = seriesAllocation(4, loss);
 
     $("#calculator-result").innerHTML = `
@@ -602,15 +554,20 @@ async function refresh(initial = false) {
     const year = state.year;
 
     try {
-        const snapshot = await fetchJSON(`data/seasons/${year}.json`);
+        const snapshot = await fetchJSON(
+            `data/seasons/${year}.json`
+        );
 
-        if (snapshot.schemaVersion !== 1 || snapshot.season !== year) {
+        if (
+            snapshot.schemaVersion !== 1 ||
+            snapshot.season !== year
+        ) {
             throw new Error("Unexpected season data");
         }
 
         let live = false;
 
-        if (year === state.index.currentSeason && !snapshot.complete) {
+        if (!snapshot.complete) {
             try {
                 const dates = [
                     dateCode(new Date()),
@@ -618,7 +575,9 @@ async function refresh(initial = false) {
                 ];
 
                 const results = await Promise.all(
-                    dates.map(date => fetchJSON(`${FEED}?dates=${date}`))
+                    dates.map(date =>
+                        fetchJSON(`${FEED}?dates=${date}`)
+                    )
                 );
 
                 const additions = results.flatMap(result => {
@@ -635,23 +594,39 @@ async function refresh(initial = false) {
                         );
                 });
 
-                snapshot.games = mergeGames(snapshot.games, additions);
+                const updatedGames = mergeGames(
+                    snapshot.games,
+                    additions
+                );
 
-                scoreSeason(state.teams, snapshot.games, snapshot.clinched);
+                scoreSeason(
+                    state.teams,
+                    updatedGames,
+                    snapshot.clinched
+                );
+
+                snapshot.games = updatedGames;
                 live = true;
             } catch {
                 // Saved season data remains available if live refresh fails.
             }
         }
 
-        scoreSeason(state.teams, snapshot.games, snapshot.clinched);
+        scoreSeason(
+            state.teams,
+            snapshot.games,
+            snapshot.clinched
+        );
+
         state.snapshot = snapshot;
 
         notice("");
         render();
 
         const saved = new Date(snapshot.updatedAt);
-        const old = Date.now() - saved.getTime() > 2 * 3600000;
+
+        const old =
+            Date.now() - saved.getTime() > 2 * 3600000;
 
         $("#freshness").textContent = live
             ? `Live scores checked ${new Date().toLocaleTimeString("en-US", {
@@ -678,7 +653,6 @@ async function refresh(initial = false) {
             );
         } else if (
             !live &&
-            year === state.index.currentSeason &&
             !snapshot.complete &&
             draft().length
         ) {
@@ -697,6 +671,7 @@ async function refresh(initial = false) {
         );
 
         if (initial) console.error(error);
+
         return false;
     } finally {
         state.busy = false;
@@ -704,336 +679,51 @@ async function refresh(initial = false) {
     }
 }
 
-function suggestedOwner() {
-    const pickCount = draft().length;
-    const snake = [0, 1, 1, 0];
+$("#series-result").addEventListener(
+    "change",
+    renderCalculator
+);
 
-    return state.league.owners[snake[pickCount % 4]].id;
-}
+$("#conference-check").addEventListener(
+    "change",
+    renderCalculator
+);
 
-function renderDraft() {
-    const picks = draft();
-
-    $("#draft-season").textContent =
-        `${state.snapshot.label} SEASON DRAFT`;
-
-    $("#owner-buttons").innerHTML = state.league.owners.map(owner => `
-    <button
-      data-owner="${escape(owner.id)}"
-      aria-pressed="${state.owner === owner.id}"
-    >
-      ${escape(owner.name)} ·
-      ${picks.filter(p => p.owner === owner.id).length}/15
-    </button>
-  `).join("");
-
-    $("#draft-progress").textContent =
-        `${picks.length} of 30 teams drafted · ` +
-        `Next pick: ${picks.length + 1} · Suggested order: snake draft`;
-
-    $("#undo-pick").disabled = !picks.length;
-
-    const query = $("#team-search").value.toLowerCase();
-    const ownerCount = picks.filter(p => p.owner === state.owner).length;
-
-    $("#draft-teams").innerHTML = state.teams
-        .filter(t => `${t.name} ${t.abbr}`.toLowerCase().includes(query))
-        .map(t => {
-            const pick = picks.find(p => p.team === t.id);
-
-            const label = pick
-                ? `${picks.indexOf(pick) + 1}. ${escape(state.league.owners.find(o => o.id === pick.owner).name)
-                }`
-                : `${t.conference} · ${t.abbr}`;
-
-            return `
-        <button
-          class="draft-team"
-          data-team="${t.id}"
-          ${pick || ownerCount >= 15 ? "disabled" : ""}
-        >
-          ${logo(t)}
-          <span>
-            ${escape(t.shortName)}
-            <small>${label}</small>
-          </span>
-        </button>
-      `;
-        }).join("");
-}
-
-function openDraft() {
-    if (!state.snapshot) return;
-
-    state.owner = suggestedOwner();
-    $("#draft-message").textContent = "";
-
-    renderDraft();
-    $("#draft-dialog").showModal();
-}
-
-function validateLeague(value) {
-    if (
-        !value ||
-        !Array.isArray(value.owners) ||
-        value.owners.length !== 2 ||
-        !value.drafts ||
-        typeof value.drafts !== "object" ||
-        Array.isArray(value.drafts)
-    ) {
-        throw new Error("Expected two owners and a drafts object");
-    }
-
-    const ids = new Set();
-
-    for (const owner of value.owners) {
-        if (
-            typeof owner.id !== "string" ||
-            !/^[a-z0-9_-]{1,30}$/i.test(owner.id) ||
-            ids.has(owner.id) ||
-            typeof owner.name !== "string" ||
-            !owner.name.trim() ||
-            owner.name.length > 35 ||
-            !/^#[0-9a-f]{6}$/i.test(owner.color)
-        ) {
-            throw new Error("Invalid owner details");
-        }
-
-        ids.add(owner.id);
-    }
-
-    for (const [year, picks] of Object.entries(value.drafts)) {
-        if (!/^20\d{2}$/.test(year)) {
-            throw new Error("Invalid season year");
-        }
-
-        validateDraft(picks, state.teams, value.owners);
-
-        for (const owner of value.owners) {
-            if (picks.filter(p => p.owner === owner.id).length > 15) {
-                throw new Error("Each owner can draft at most 15 teams");
-            }
-        }
-    }
-
-    return value;
-}
-
-$("#series-result").addEventListener("change", renderCalculator);
-$("#conference-check").addEventListener("change", renderCalculator);
 window.addEventListener("hashchange", navigate);
 
-$("#refresh").addEventListener("click", () => refresh());
-
-$("#season").addEventListener("change", async event => {
-    if (state.busy) {
-        event.target.value = String(state.year);
-        return;
-    }
-
-    const previousYear = state.year;
-    const previousSnapshot = state.snapshot;
-
-    state.year = Number(event.target.value);
-    state.snapshot = null;
-
-    notice("Loading season…");
-
-    const ok = await refresh(true);
-
-    if (!ok) {
-        state.year = previousYear;
-        state.snapshot = previousSnapshot;
-        event.target.value = String(previousYear);
-
-        if (previousSnapshot) render();
-
-        notice(
-            "That season could not be loaded. Showing the previous season.",
-            true
-        );
-    }
-});
+$("#refresh").addEventListener(
+    "click",
+    () => refresh()
+);
 
 $$("[data-filter]").forEach(button => {
     button.addEventListener("click", () => {
         state.filter = button.dataset.filter;
 
         $$("[data-filter]").forEach(other => {
-            other.setAttribute("aria-pressed", String(other === button));
+            other.setAttribute(
+                "aria-pressed",
+                String(other === button)
+            );
         });
 
         if (state.snapshot) renderGames();
     });
 });
 
-$("#open-draft").addEventListener("click", openDraft);
-$("#teams-draft").addEventListener("click", openDraft);
-
-$("#close-draft").addEventListener("click", () => {
-    $("#draft-dialog").close();
-});
-
-$("#owner-buttons").addEventListener("click", event => {
-    const button = event.target.closest("[data-owner]");
-
-    if (button) {
-        state.owner = button.dataset.owner;
-        renderDraft();
-    }
-});
-
-$("#team-search").addEventListener("input", renderDraft);
-
-$("#draft-teams").addEventListener("click", event => {
-    const button = event.target.closest("[data-team]");
-
-    if (!button || button.disabled) return;
-
-    try {
-        saveDraft([
-            ...draft(),
-            { team: button.dataset.team, owner: state.owner }
-        ]);
-
-        state.owner = suggestedOwner();
-
-        notice("");
-        renderDraft();
-        render();
-    } catch (error) {
-        $("#draft-message").textContent = error.message;
-    }
-});
-
-$("#undo-pick").addEventListener("click", () => {
-    try {
-        saveDraft(draft().slice(0, -1));
-        state.owner = suggestedOwner();
-
-        renderDraft();
-        render();
-    } catch (error) {
-        $("#draft-message").textContent = error.message;
-    }
-});
-
-$("#published-draft").addEventListener("click", () => {
-    try {
-        localStorage.removeItem(storageKey(state.year));
-        state.owner = suggestedOwner();
-
-        renderDraft();
-        notice("");
-        render();
-
-        $("#draft-message").textContent =
-            "Now using the published rosters.";
-    } catch (error) {
-        $("#draft-message").textContent = error.message;
-    }
-});
-
-$("#export-draft").addEventListener("click", () => {
-    const config = structuredClone(state.league);
-
-    for (const info of state.index.seasons) {
-        try {
-            const picks = JSON.parse(
-                localStorage.getItem(storageKey(info.year))
-            );
-
-            if (picks) {
-                config.drafts[String(info.year)] = validateDraft(
-                    picks,
-                    state.teams,
-                    config.owners
-                );
-            }
-        } catch { }
-    }
-
-    config.drafts[String(state.year)] = draft();
-
-    const blob = new Blob(
-        [JSON.stringify(config, null, 2) + "\n"],
-        { type: "application/json" }
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "league.json";
-    link.click();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-    $("#draft-message").textContent =
-        "Downloaded. Replace league.json in the root of your GitHub repository " +
-        "to publish the rosters.";
-});
-
-$("#import-draft").addEventListener("change", async event => {
-    try {
-        const file = event.target.files[0];
-
-        if (!file) return;
-        if (file.size > 100000) throw new Error("Draft file is too large");
-
-        const config = validateLeague(JSON.parse(await file.text()));
-
-        if (
-            config.owners.some(
-                (owner, index) => owner.id !== state.league.owners[index].id
-            )
-        ) {
-            throw new Error("Owner IDs must match this league");
-        }
-
-        const picks = config.drafts[String(state.year)];
-
-        if (!picks) {
-            throw new Error("This file does not include the selected season");
-        }
-
-        saveDraft(picks);
-        state.owner = suggestedOwner();
-
-        notice("");
-        renderDraft();
-        render();
-
-        $("#draft-message").textContent =
-            "Draft imported on this device.";
-    } catch (error) {
-        $("#draft-message").textContent = error.message;
-    }
-
-    event.target.value = "";
-});
-
 async function init() {
     try {
-        const [teams, index, league] = await Promise.all([
+        const [teams, league] = await Promise.all([
             fetchJSON("data/teams.json"),
-            fetchJSON("data/index.json"),
             fetchJSON("league.json")
         ]);
 
         state.teams = teams;
-        state.league = validateLeague(league);
-        state.index = index;
-        state.year = index.currentSeason;
+        state.league = parseLeague(league, teams);
+        state.year = state.league.season;
 
-        $("#season").innerHTML = index.seasons.map(season => `
-      <option
-        value="${season.year}"
-        ${season.year === state.year ? "selected" : ""}
-      >
-        ${escape(season.label)}${season.complete ? " · Final" : ""}
-      </option>
-    `).join("");
+        $("#season-label").textContent =
+            `${state.year - 1}–${state.year} season`;
 
         document.title =
             `${league.title || league.owners.map(o => o.name).join(" vs. ")} ` +
@@ -1042,13 +732,13 @@ async function init() {
         await refresh(true);
 
         setInterval(() => {
-            if (!document.hidden && !$("#draft-dialog").open) {
+            if (!document.hidden) {
                 refresh();
             }
         }, 60000);
 
         document.addEventListener("visibilitychange", () => {
-            if (!document.hidden && !$("#draft-dialog").open) {
+            if (!document.hidden) {
                 refresh();
             }
         });

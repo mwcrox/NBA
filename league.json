@@ -1,5 +1,6 @@
 {
     "title": "Michael vs. Zach",
+    "season": 2027,
     "owners": [
         {
             "id": "michael",
@@ -12,5 +13,8 @@
             "color": "#b9a1ff"
         }
     ],
-    "drafts": {}
+    "rosters": {
+        "michael": [],
+        "zach": []
+    }
 }

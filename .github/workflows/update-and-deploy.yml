@@ -32,16 +32,6 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Generate historical JSON on first run
-        run: |
-          if [ ! -f data/seasons/2025.json ]; then
-            node scripts/update-data.mjs 2025
-          fi
-
-          if [ ! -f data/seasons/2026.json ]; then
-            node scripts/update-data.mjs 2026
-          fi
-
       - name: Check scoring rules
         run: npm test
 
@@ -58,9 +48,9 @@ jobs:
 
       - name: Confirm generated data exists
         run: |
-          test -f data/index.json
+          node --input-type=module -e 'import fs from "node:fs"; const league=JSON.parse(fs.readFileSync("league.json")); if(!fs.existsSync(`data/seasons/${league.season}.json`)) throw new Error("The configured season has no saved snapshot. Retry the data update.");'
 
-      - name: Save snapshots and history
+      - name: Save season snapshot
         run: |
           git config user.name 'NBA score updater'
           git config user.email 'nba-updater@users.noreply.github.com'
@@ -78,7 +68,10 @@ jobs:
         run: |
           mkdir -p public
           cp index.html style.css app.mjs league.json public/
-          cp -r assets data public/
+          cp -r assets public/
+          mkdir -p public/data/seasons
+          cp data/teams.json public/data/
+          node --input-type=module -e 'import fs from "node:fs"; const league=JSON.parse(fs.readFileSync("league.json")); fs.copyFileSync(`data/seasons/${league.season}.json`, `public/data/seasons/${league.season}.json`);'
           touch public/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3

@@ -4,12 +4,13 @@ import { fileURLToPath } from "node:url";
 
 import {
     FEED,
-    currentSeason,
     seasonKey,
     normalizeEvent,
     mergeGames,
     scoreSeason
 } from "../assets/scoring.mjs";
+
+import { parseLeague } from "../assets/league.mjs";
 
 const root = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -31,7 +32,9 @@ async function json(url) {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status} for ${url}`);
+                throw new Error(
+                    `HTTP ${response.status} for ${url}`
+                );
             }
 
             return await response.json();
@@ -40,7 +43,10 @@ async function json(url) {
 
             if (attempt < 2) {
                 await new Promise(resolve => {
-                    setTimeout(resolve, 1000 * (attempt + 1));
+                    setTimeout(
+                        resolve,
+                        1000 * (attempt + 1)
+                    );
                 });
             }
         }
@@ -68,14 +74,20 @@ async function pool(items, fn) {
 async function atomic(filename, object) {
     const destination = path.join(root, filename);
 
-    await fs.mkdir(path.dirname(destination), { recursive: true });
+    await fs.mkdir(
+        path.dirname(destination),
+        { recursive: true }
+    );
 
     await fs.writeFile(
         destination + ".tmp",
         JSON.stringify(object) + "\n"
     );
 
-    await fs.rename(destination + ".tmp", destination);
+    await fs.rename(
+        destination + ".tmp",
+        destination
+    );
 }
 
 async function build(year, teams) {
@@ -99,7 +111,9 @@ async function build(year, teams) {
             !Array.isArray(result.events) ||
             result.events.length >= 1000
         ) {
-            throw new Error(`Missing or truncated ${month} schedule`);
+            throw new Error(
+                `Missing or truncated ${month} schedule`
+            );
         }
 
         return result.events
@@ -130,7 +144,8 @@ async function build(year, teams) {
     // A play-in berth alone is not a playoff berth.
     const clinched = Number(standings.season?.year) === year
         ? entries.filter(entry => {
-            const description = stats(entry).clincher?.description || "";
+            const description =
+                stats(entry).clincher?.description || "";
 
             return (
                 /clinched.*(?:playoff|division|conference)/i.test(description) &&
@@ -139,13 +154,21 @@ async function build(year, teams) {
         }).map(entry => String(entry.team.id))
         : [];
 
-    const scored = scoreSeason(teams, games, clinched);
+    const scored = scoreSeason(
+        teams,
+        games,
+        clinched
+    );
+
     const now = new Date();
 
     const alreadyStarted =
         now >= new Date(`${year - 1}-11-01T00:00:00Z`);
 
-    if (alreadyStarted && !games.some(game => game.completed)) {
+    if (
+        alreadyStarted &&
+        !games.some(game => game.completed)
+    ) {
         throw new Error(
             `No completed games returned for ${seasonKey(year)}`
         );
@@ -156,7 +179,8 @@ async function build(year, teams) {
         entries.length === 30
     ) {
         const expected = entries.reduce(
-            (sum, entry) => sum + Number(stats(entry).wins?.value || 0),
+            (sum, entry) =>
+                sum + Number(stats(entry).wins?.value || 0),
             0
         );
 
@@ -173,18 +197,24 @@ async function build(year, teams) {
     let previous;
 
     try {
-        previous = await read(`data/seasons/${year}.json`);
+        previous = await read(
+            `data/seasons/${year}.json`
+        );
     } catch { }
 
     if (
         previous &&
         games.length < previous.games.length - 15
     ) {
-        throw new Error("Unexpected loss of schedule coverage");
+        throw new Error(
+            "Unexpected loss of schedule coverage"
+        );
     }
 
     const complete = scored.series.some(
-        series => series.round === 4 && series.winner
+        series =>
+            series.round === 4 &&
+            series.winner
     );
 
     if (
@@ -212,7 +242,10 @@ async function build(year, teams) {
         games
     };
 
-    await atomic(`data/seasons/${year}.json`, snapshot);
+    await atomic(
+        `data/seasons/${year}.json`,
+        snapshot
+    );
 
     console.log(
         `${snapshot.label}: ${games.length} games; ` +
@@ -229,57 +262,24 @@ async function build(year, teams) {
 
 const teams = await read("data/teams.json");
 
-let index;
+const league = parseLeague(
+    await read("league.json"),
+    teams
+);
 
-try {
-    index = await read("data/index.json");
-} catch {
-    index = { seasons: [] };
-}
-
-const explicit = process.argv.slice(2).map(Number);
-
-if (
-    explicit.some(year =>
-        !Number.isInteger(year) ||
-        year < 2025 ||
-        year > 2100
-    )
-) {
+if (process.argv.length > 2) {
     throw new Error(
-        "Pass season END years, e.g. 2027 for 2026-27"
+        "The tracked season is configured in league.json; no year argument is needed."
     );
 }
 
-const current = currentSeason();
+const info = await build(
+    league.season,
+    teams
+);
 
-const years = explicit.length
-    ? explicit
-    : [
-        current,
-        ...index.seasons
-            .filter(season => !season.complete && season.year < current)
-            .map(season => season.year)
-    ];
-
-for (const year of [...new Set(years)]) {
-    const info = await build(year, teams);
-
-    index.seasons = index.seasons.filter(
-        season => season.year !== year
-    );
-
-    index.seasons.push(info);
-}
-
-index.seasons.sort((a, b) => b.year - a.year);
-
-index.currentSeason = index.seasons.some(
-    season => season.year === current
-)
-    ? current
-    : index.seasons[0].year;
-
-index.updatedAt = new Date().toISOString();
-
-await atomic("data/index.json", index);
+await atomic("data/index.json", {
+    seasons: [info],
+    currentSeason: league.season,
+    updatedAt: new Date().toISOString()
+});

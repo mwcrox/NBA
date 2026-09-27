@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -26,15 +26,13 @@
             </a>
 
             <nav aria-label="Main navigation">
-                <a href="#home" data-page="home" aria-current="page">Scoreboard</a>
+                <a href="#home" data-page="home" aria-current="page">
+                    Scoreboard
+                </a>
                 <a href="#teams" data-page="teams">Teams</a>
                 <a href="#playoffs" data-page="playoffs">Playoffs</a>
                 <a href="#rules" data-page="rules">Scoring</a>
             </nav>
-
-            <button class="button small secondary" id="open-draft">
-                Manage draft <span aria-hidden="true">↗</span>
-            </button>
         </div>
     </header>
 
@@ -45,24 +43,21 @@
                 THE SEASON-LONG RIVALRY
             </span>
 
-            <label class="season-picker">
-                Season
-                <select id="season" aria-label="Select season">
-                    <option>Loading…</option>
-                </select>
-            </label>
+            <span class="season-label" id="season-label">
+                2026–2027 season
+            </span>
         </div>
 
-        <div id="notice" class="notice" role="status" aria-live="polite">
+        <div class="notice" id="notice" role="status" aria-live="polite">
             Loading NBA season data…
         </div>
 
-        <div id="local-notice" class="notice local" hidden></div>
-
-        <section id="home" class="page">
+        <section class="page" id="home">
             <div class="heading">
                 <div>
-                    <p class="eyebrow">30 TEAMS. TWO SIDES. EVERY WIN COUNTS.</p>
+                    <p class="eyebrow">
+                        30 TEAMS. TWO SIDES. EVERY WIN COUNTS.
+                    </p>
                     <h1>The hardwood rivalry<span>.</span></h1>
                     <p class="subtitle" id="season-caption">
                         Your teams. One season. Bragging rights.
@@ -71,22 +66,22 @@
 
                 <div class="update-controls">
                     <span id="freshness">Connecting…</span>
-                    <button class="icon-button" id="refresh" aria-label="Refresh scores">↻</button>
+                    <button class="icon-button" id="refresh" aria-label="Refresh scores">
+                        ↻
+                    </button>
                 </div>
             </div>
 
-            <div id="scoreboard" class="scoreboard" aria-live="polite">
+            <div class="scoreboard" id="scoreboard" aria-live="polite">
                 <div class="empty">Loading the scoreboard…</div>
             </div>
 
             <div class="race">
-                <div id="race-bar" class="race-bar">
+                <div class="race-bar" id="race-bar">
                     <span style="width:50%"></span>
                 </div>
-
                 <div class="race-caption">
                     <span id="lead">Waiting for the draft</span>
-                    <span id="awarded">852 league points available</span>
                 </div>
             </div>
 
@@ -97,7 +92,9 @@
                 </div>
 
                 <div class="segmented" aria-label="Game filter">
-                    <button data-filter="all" aria-pressed="true">All games</button>
+                    <button data-filter="all" aria-pressed="true">
+                        All games
+                    </button>
                     <button data-filter="rivalry" aria-pressed="false">
                         Head-to-head
                     </button>
@@ -108,11 +105,11 @@
                 Recent results and upcoming games. Only final results earn points.
             </p>
 
-            <div id="games" class="games-grid"></div>
+            <div class="games-grid" id="games"></div>
             <div class="season-stats" id="season-stats"></div>
         </section>
 
-        <section id="teams" class="page" hidden>
+        <section class="page" id="teams" hidden>
             <div class="heading">
                 <div>
                     <p class="eyebrow">THE DRAFT BOARD</p>
@@ -121,16 +118,12 @@
                         Every team’s contribution, from opening night to the Finals.
                     </p>
                 </div>
-
-                <button class="button secondary" id="teams-draft">
-                    Manage draft
-                </button>
             </div>
 
-            <div id="rosters" class="rosters"></div>
+            <div class="rosters" id="rosters"></div>
 
             <details class="panel all-teams">
-                <summary>All 30 NBA teams &amp; scoring breakdown</summary>
+                <summary>All 30 NBA teams &amp; total points</summary>
 
                 <div class="table-wrap">
                     <table>
@@ -138,11 +131,7 @@
                             <tr>
                                 <th>Team</th>
                                 <th>W–L</th>
-                                <th>Regular</th>
-                                <th>Playoffs</th>
-                                <th>Series</th>
-                                <th>Conf.</th>
-                                <th>Total</th>
+                                <th>Total points</th>
                             </tr>
                         </thead>
                         <tbody id="all-team-rows"></tbody>
@@ -151,7 +140,7 @@
             </details>
         </section>
 
-        <section id="playoffs" class="page" hidden>
+        <section class="page" id="playoffs" hidden>
             <div class="heading">
                 <div>
                     <p class="eyebrow">THE ROAD TO THE FINALS</p>
@@ -160,20 +149,18 @@
                         Game wins earn one point. The series winner claims the unplayed games.
                     </p>
                 </div>
-
-                <span class="pill">237 postseason points</span>
             </div>
 
             <div id="playoff-content"></div>
         </section>
 
-        <section id="rules" class="page" hidden>
+        <section class="page" id="rules" hidden>
             <div class="heading">
                 <div>
                     <p class="eyebrow">THE RULEBOOK</p>
                     <h1>Make every win count<span>.</span></h1>
                     <p class="subtitle">
-                        852 points across a full NBA season. One rivalry to settle.
+                        Your teams. One season. One rivalry to settle.
                     </p>
                 </div>
             </div>
@@ -183,7 +170,7 @@
                     <span class="rule-number">0.5</span>
                     <h2>Regular-season win</h2>
                     <p>
-                        Each win adds half a point. 1,230 games put 615 points on the board.
+                        Each regular-season win adds half a point to the team’s owner.
                     </p>
                 </article>
 
@@ -230,7 +217,7 @@
                     <div id="calculator-result" aria-live="polite"></div>
 
                     <label class="checkbox">
-                        <input type="checkbox" id="conference-check">
+                        <input id="conference-check" type="checkbox">
                         This is a conference final
                     </label>
                 </article>
@@ -259,11 +246,6 @@
                             in a playoff series.
                         </li>
                     </ul>
-
-                    <div class="split-stat">
-                        <span>Regular season <strong>72.18%</strong></span>
-                        <span>Postseason <strong>27.82%</strong></span>
-                    </div>
                 </article>
             </div>
         </section>
@@ -280,68 +262,13 @@
         </span>
     </footer>
 
-    <dialog id="draft-dialog" aria-labelledby="draft-title">
-        <div class="dialog-head">
-            <div>
-                <p class="eyebrow" id="draft-season">SEASON DRAFT</p>
-                <h2 id="draft-title">Build your rosters</h2>
-            </div>
-
-            <button class="icon-button" id="close-draft" aria-label="Close draft">×</button>
-        </div>
-
-        <p class="muted">
-            Choose an owner, then pick a team. Draft order is saved as you go.
-        </p>
-
-        <div id="owner-buttons" class="owner-buttons"></div>
-
-        <div class="draft-toolbar">
-            <input type="search" id="team-search" placeholder="Find a team…" aria-label="Search available NBA teams">
-            <button class="button small secondary" id="undo-pick">
-                Undo last pick
-            </button>
-        </div>
-
-        <div id="draft-progress" class="draft-progress" aria-live="polite"></div>
-
-        <div id="draft-teams" class="draft-teams"></div>
-
-        <div class="draft-save">
-            <strong>Saved on this device</strong>
-
-            <p>
-                To give everyone the same rosters, download <code>league.json</code>
-                and replace that file in your GitHub repository once after the draft.
-                Scores update automatically.
-            </p>
-
-            <div class="draft-actions">
-                <button class="button" id="export-draft">
-                    Download league.json
-                </button>
-
-                <label class="button secondary file-label">
-                    Import draft
-                    <input id="import-draft" type="file" accept=".json,application/json">
-                </label>
-
-                <button class="text-button" id="published-draft">
-                    Use published draft
-                </button>
-            </div>
-
-            <p id="draft-message" role="status"></p>
-        </div>
-    </dialog>
-
     <noscript>
         <div class="notice">
             Enable JavaScript to load the NBA standings and scoring.
         </div>
     </noscript>
 
-    <script type="module" src="app.mjs"></script>
+    <script src="app.mjs" type="module"></script>
 </body>
 
 </html>
