@@ -116,11 +116,6 @@ function render() {
 
     const max = Math.max(...owners.map(o => o.total));
 
-    $("#season-caption").textContent =
-        `${state.snapshot.label} NBA season · ` +
-        (state.snapshot.complete
-            ? "Final results"
-            : "Automatic scores. All season long.");
 
     $("#scoreboard").innerHTML = owners.map((owner, index) => {
         const leading =
