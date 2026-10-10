@@ -14,7 +14,39 @@
         }
     ],
     "rosters": {
-        "michael": [],
-        "zach": []
+        "michael": [
+            "OKC",
+            "PHI",
+            "DEN",
+            "MIA",
+            "MIN",
+            "DET",
+            "LAL",
+            "PHX",
+            "UTAH",
+            "GS",
+            "WSH",
+            "DAL",
+            "CHI",
+            "MIL",
+            "SAC"
+        ],
+        "zach": [
+            "SA",
+            "NY",
+            "BOS",
+            "HOU",
+            "TOR",
+            "CLE",
+            "IND",
+            "ORL",
+            "ATL",
+            "POR",
+            "CHA",
+            "NO",
+            "LAC",
+            "BKN",
+            "MEM"
+        ]
     }
 }
